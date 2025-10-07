@@ -48,6 +48,13 @@ app.get('/', (req, res) => {
     });
 });
 
+app.use((req, res, next) => {
+    res.status(404).json({
+        message: 'Route not found',
+        path: req.method + ' ' + req.originalUrl
+    });
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);

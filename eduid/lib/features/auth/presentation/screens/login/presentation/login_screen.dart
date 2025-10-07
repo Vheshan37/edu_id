@@ -1,4 +1,4 @@
-import 'package:eduid/features/auth/presentation/sign_up/presentation/sign_up_screen.dart';
+import 'package:eduid/features/auth/presentation/screens/sign_up/presentation/sign_up_screen.dart';
 import 'package:eduid/features/home/presentation/home_screen.dart';
 import 'package:flutter/material.dart';
 
