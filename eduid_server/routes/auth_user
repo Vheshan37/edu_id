@@ -1,0 +1,25 @@
+const { pool } = require('../infrastructure/db');
+
+const router = require('express').Router();
+
+router.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    pool.query("SELECT * FROM users WHERE email = $1 AND password = $2", [email, password], (err, dbres) => {
+        // Handle database errors
+        if (err) {
+            console.error('Error executing query', err.stack);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+
+        // Check if user exists
+        if (dbres.rowCount === 0) {
+            return res.status(401).json({ message: 'Authentication failed' });
+        }
+
+        // Authentication successful
+        return res.status(200).json({ message: 'Authentication successful', user: dbres.rows[0] });
+    });
+});
+
+module.exports = router;
