@@ -1,9 +1,9 @@
 import 'package:eduid/features/auth/domain/repository/user_repository.dart';
 
-class RequestLogin {
+class RequestLoginUseCase {
   final UserRepository userRepository;
 
-  RequestLogin({required this.userRepository});
+  RequestLoginUseCase({required this.userRepository});
 
   Future<Map<String, dynamic>> call() {
     return userRepository.requestLogin();

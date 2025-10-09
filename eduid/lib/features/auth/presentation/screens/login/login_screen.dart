@@ -1,9 +1,15 @@
-import 'package:eduid/features/auth/presentation/screens/sign_up/presentation/sign_up_screen.dart';
+import 'package:eduid/features/auth/presentation/bloc/login/auth_bloc.dart';
+import 'package:eduid/features/auth/presentation/screens/sign_up/sign_up_screen.dart';
 import 'package:eduid/features/home/presentation/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -61,12 +67,14 @@ class LoginScreen extends StatelessWidget {
                   // inputs
                   // email
                   TextField(
+                    controller: emailController,
                     decoration: InputDecoration(
                       label: Text('Email'),
                       border: OutlineInputBorder(),
                     ),
                   ),
                   TextField(
+                    controller: passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       label: Text('Password'),
@@ -103,12 +111,37 @@ class LoginScreen extends StatelessWidget {
                 child: TextButton(
                   onPressed: () {
                     debugPrint('Sign in button pressed');
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    context.read<AuthBloc>().add(
+                      RequestLogin(
+                        email: emailController.text,
+                        password: passwordController.text,
+                      ),
                     );
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => HomeScreen()),
+                    // );
                   },
-                  child: Text('Sign In'),
+                  child: BlocConsumer<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                      if (state is UnAuthenticated) {
+                        _showAlert(context, state.title, state.message);
+                      } else if (state is AuthError) {
+                        _showAlert(context, 'Login Failed', state.message);
+                      } else if (state is AuthAuthenticated) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => HomeScreen()),
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is AuthLoading) {
+                        return CircularProgressIndicator();
+                      }
+                      return Text('Sign In');
+                    },
+                  ),
                 ),
               ),
               GestureDetector(
@@ -133,6 +166,34 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showAlert(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close popup
+              },
+              child: const Text("Ok"),
+            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //     // Do your action here
+            //   },
+            //   child: const Text("OK"),
+            // ),
+          ],
+          backgroundColor: Colors.orange,
+        );
+      },
     );
   }
 }

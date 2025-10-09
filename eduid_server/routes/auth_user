@@ -1,25 +1,43 @@
+const { generateAccessToken, generateRefreshToken } = require('../infrastructure/authorization/jwt_helper');
 const { pool } = require('../infrastructure/db');
-
 const router = require('express').Router();
 
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    pool.query("SELECT * FROM users WHERE email = $1 AND password = $2", [email, password], (err, dbres) => {
-        // Handle database errors
-        if (err) {
-            console.error('Error executing query', err.stack);
-            return res.status(500).json({ message: 'Internal server error' });
-        }
+    pool.query(
+        `SELECT 
+            users.*,
+            json_build_object(
+                'id', user_role.id,
+                'role', user_role.role
+            ) AS role
+        FROM users 
+        JOIN user_role ON user_role.id=users.user_role 
+        WHERE email = $1 AND password = $2`
+        , [email, password], (err, dbres) => {
+            // Handle database errors
+            if (err) {
+                console.error('Error executing query', err.stack);
+                return res.status(500).json({ message: 'Internal server error' });
+            }
 
-        // Check if user exists
-        if (dbres.rowCount === 0) {
-            return res.status(401).json({ message: 'Authentication failed' });
-        }
+            // Check if user exists
+            if (dbres.rowCount === 0) {
+                return res.status(401).json({ message: 'Authentication failed' });
+            }
 
-        // Authentication successful
-        return res.status(200).json({ message: 'Authentication successful', user: dbres.rows[0] });
-    });
+            const token = generateAccessToken(dbres.rows[0]);
+            const refreshToken = generateRefreshToken(dbres.rows[0]);
+
+            // Authentication successful
+            return res.status(200).json({
+                message: 'Authentication successful',
+                user: dbres.rows[0],
+                token,
+                refreshToken
+            });
+        });
 });
 
 module.exports = router;
