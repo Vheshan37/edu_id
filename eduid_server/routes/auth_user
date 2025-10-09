@@ -7,11 +7,15 @@ router.post('/login', (req, res) => {
 
     pool.query(
         `SELECT 
-            users.*,
             json_build_object(
-                'id', user_role.id,
-                'role', user_role.role
-            ) AS role
+                'id', users.id,
+                'name', users.name,
+                'email', users.email,
+                'role', json_build_object(
+                    'id', user_role.id,
+                    'role', user_role.role
+                )
+            ) AS user
         FROM users 
         JOIN user_role ON user_role.id=users.user_role 
         WHERE email = $1 AND password = $2`
@@ -27,13 +31,15 @@ router.post('/login', (req, res) => {
                 return res.status(401).json({ message: 'Authentication failed' });
             }
 
-            const token = generateAccessToken(dbres.rows[0]);
-            const refreshToken = generateRefreshToken(dbres.rows[0]);
+            const user = dbres.rows[0].user;
 
+            const token = generateAccessToken(user);
+            const refreshToken = generateRefreshToken(user);
+            
             // Authentication successful
             return res.status(200).json({
                 message: 'Authentication successful',
-                user: dbres.rows[0],
+                user,
                 token,
                 refreshToken
             });

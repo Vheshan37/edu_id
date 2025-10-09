@@ -4,12 +4,14 @@ const port = 3000;
 
 // routes
 const auth_userRouter = require('./routes/auth_user');
+const verifyTokenRouter = require('./routes/verify_token');
 const { pool } = require('./infrastructure/db');
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
 app.use('/auth_user', auth_userRouter);
+app.use('/verify_token', verifyTokenRouter);
 
 app.get('/', (req, res) => {
     pool.query(`
@@ -21,7 +23,7 @@ app.get('/', (req, res) => {
                 'id', user_role.id,
                 'role', user_role.role
             )
-        ) AS user_data
+        ) AS user
         FROM users
         JOIN user_role ON user_role.id = users.user_role;
         `, (err, dbres) => {

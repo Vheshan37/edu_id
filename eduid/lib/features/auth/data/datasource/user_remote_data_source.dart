@@ -1,27 +1,28 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:eduid/app/flutter_secure_storage.dart';
 import 'package:eduid/core/exception/login_exception.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http show Client;
 
 abstract class UserRemoteDataSource {
   Future<Map<String, dynamic>> requestLogin();
+  Future<Map<String, dynamic>> verifyToken();
 }
 
 class UserRemoteDataSourceImpl extends UserRemoteDataSource {
   final http.Client client;
-  final String email;
-  final String password;
+  final String? email;
+  final String? password;
 
   UserRemoteDataSourceImpl({
     required this.client,
-    required this.email,
-    required this.password,
+    this.email,
+    this.password,
   });
 
-  @override
-  Future<Map<String, dynamic>> requestLogin() async {
+  String get baseUrl {
     final String baseUrl;
     if (Platform.isAndroid) {
       baseUrl = "http://10.0.2.2:3000/";
@@ -30,6 +31,11 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
     } else {
       baseUrl = "http://localhost:3000/";
     }
+    return baseUrl;
+  }
+
+  @override
+  Future<Map<String, dynamic>> requestLogin() async {
     final response = await client.post(
       Uri.parse('${baseUrl}auth_user/login'),
       headers: {
@@ -66,6 +72,58 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
         message:
             'An unexpected error occurred. Please check your connection and try again.',
       );
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyToken() async {
+    final storage = SecureStorage.instance.storage;
+    final String? accessToken = await storage.read(key: 'accessToken');
+    final String? refreshToken = await storage.read(key: 'refreshToken');
+    debugPrint('Access Token: $accessToken');
+    debugPrint('Refresh Token: $refreshToken');
+
+    final response = await client.post(
+      Uri.parse('${baseUrl}verify_token/refresh_token'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'accessToken': accessToken,
+        'refreshToken': refreshToken,
+      }),
+    );
+
+    debugPrint('Response: $response');
+    debugPrint('Response (Status): ${response.statusCode}');
+    final json = await jsonDecode(response.body);
+
+    debugPrint('Response JSON: $json');
+
+    final status = response.statusCode;
+    final state = json['state'];
+    debugPrint('State: $state');
+
+    if (status == 200) {
+      // request success
+      debugPrint('Response JSON: $json');
+      return json;
+    } else if (status == 400 && state == 'missing_tokens') {
+      debugPrint('Response: Missing Tokens');
+      throw Exception(json['message']);
+    } else if (status == 400 && state == 'valid') {
+      debugPrint('Response: Valid');
+      return json;
+    } else if (status == 401 && state == 'invalid_refresh_token') {
+      debugPrint('Response: Invalid Refresh Token');
+      throw Exception(json['message']);
+    } else if (status == 403 && state == 'invalid_access_token') {
+      debugPrint('Response: Invalid Access Token');
+      throw Exception(json['message']);
+    } else {
+      debugPrint('Response: Something Went Wrong');
+      throw Exception('Something went wrong');
     }
   }
 }

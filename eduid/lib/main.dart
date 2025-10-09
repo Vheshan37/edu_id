@@ -1,3 +1,4 @@
+import 'package:eduid/features/splash/presentation/bloc/authorization_bloc.dart';
 import 'package:eduid/features/auth/presentation/bloc/login/auth_bloc.dart';
 import 'package:eduid/features/splash/presentation/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 void main() {
   runApp(
     MultiBlocProvider(
-      providers: [BlocProvider(create: (context) => AuthBloc())],
+      providers: [
+        BlocProvider(create: (context) => AuthBloc()),
+        BlocProvider(
+          create: (context) => AuthorizationBloc()..add(RequestAuthorization()),
+        ),
+      ],
       child: const MyApp(),
     ),
   );

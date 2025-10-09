@@ -1,3 +1,4 @@
+import 'package:eduid/app/flutter_secure_storage.dart';
 import 'package:eduid/core/exception/login_exception.dart';
 import 'package:eduid/features/auth/data/datasource/user_remote_data_source.dart';
 import 'package:eduid/features/auth/data/model/user_model.dart';
@@ -26,12 +27,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
 
         final response = await useCase.call();
-
         debugPrint('BLoC Response: $response');
-        emit(AuthAuthenticated(userModel: UserModel.fromJson(json: response['user'])));
+
+        // flutter secure storage.
+        // save login jwt token here...
+        final storage = SecureStorage.instance.storage;
+        await storage.delete(key: 'accessToken');
+        await storage.delete(key: 'refreshToken');
+        debugPrint('JWT are deleted');
+        await storage.write(key: 'accessToken', value: response['token']);
+        await storage.write(
+          key: 'refreshToken',
+          value: response['refreshToken'],
+        );
+
+        final userModel = UserModel.fromJson(json: response['user']);
+        await storage.write(key: 'user', value: userModel.toString());
+        debugPrint('New JWT are saved');
+
+        emit(AuthAuthenticated(userModel: userModel));
       } on LoginException catch (e) {
+        debugPrint(e.toString());
         emit(UnAuthenticated(message: e.message, title: e.title));
       } catch (e) {
+        debugPrint(e.toString());
         emit(AuthError(message: e.toString()));
       }
     });
