@@ -22,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               client: http.Client(),
               email: event.email,
               password: event.password,
+              isTeacher: event.isTeacher,
             ),
           ),
         );

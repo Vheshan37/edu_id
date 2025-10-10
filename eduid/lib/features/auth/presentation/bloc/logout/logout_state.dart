@@ -8,4 +8,7 @@ class LogoutLoading extends LogoutState{}
 
 class LogoutSuccess extends LogoutState{}
 
-class LogoutFailed extends LogoutState{}
+class LogoutFailed extends LogoutState{
+  final String messsage;
+  LogoutFailed({required this.messsage});
+}

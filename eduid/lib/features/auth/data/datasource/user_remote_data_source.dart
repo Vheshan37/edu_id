@@ -15,11 +15,13 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
   final http.Client client;
   final String? email;
   final String? password;
+  final bool? isTeacher;
 
   UserRemoteDataSourceImpl({
     required this.client,
     this.email,
     this.password,
+    this.isTeacher,
   });
 
   String get baseUrl {
@@ -42,7 +44,11 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: jsonEncode({'email': email, 'password': password}),
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+        'isTeacher': isTeacher,
+      }),
     );
 
     debugPrint('Response: $response');

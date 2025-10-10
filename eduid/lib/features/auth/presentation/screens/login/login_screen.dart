@@ -5,11 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  bool _isTeacher = true;
+  bool _checkedRememberMe = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,32 +39,52 @@ class LoginScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 20,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      border: Border.all(width: 1),
-                    ),
-                    child: Row(
-                      spacing: 10,
-                      children: [
-                        Image.asset('assets/images/teacher.png'),
-                        Text('Teacher'),
-                      ],
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isTeacher = false;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        border: Border.all(width: 1),
+                      ),
+                      child: Row(
+                        spacing: 10,
+                        children: [
+                          Image.asset('assets/images/teacher.png'),
+                          Text('Student'),
+                        ],
+                      ),
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      border: Border.all(width: 1),
-                    ),
-                    child: Row(
-                      spacing: 10,
-                      children: [
-                        Image.asset('assets/images/student.png'),
-                        Text('Teacher'),
-                      ],
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isTeacher = true;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        border: Border.all(width: 1),
+                      ),
+                      child: Row(
+                        spacing: 10,
+                        children: [
+                          Image.asset('assets/images/student.png'),
+                          Text('Teacher'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -84,22 +112,32 @@ class LoginScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        spacing: 10,
-                        children: [
-                          Checkbox(
-                            visualDensity: VisualDensity.compact,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            value: false,
-                            onChanged: (value) => () {
-                              debugPrint(
-                                'check box onchange method not implemented',
-                              );
-                            },
-                          ),
-                          Text('Remember Me'),
-                        ],
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _checkedRememberMe = !_checkedRememberMe;
+                          });
+                        },
+                        child: Row(
+                          spacing: 4,
+                          children: [
+                            Checkbox(
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              value: _checkedRememberMe,
+                              onChanged: (value) {
+                                // setState(() {
+                                //   _checkedRememberMe = value ?? false;
+                                // });
+                                // debugPrint(
+                                //   'check box onchange method not implemented',
+                                // );
+                              },
+                            ),
+                            Text('Remember Me'),
+                          ],
+                        ),
                       ),
                       Text('Forgot password?'),
                     ],
@@ -111,10 +149,12 @@ class LoginScreen extends StatelessWidget {
                 child: TextButton(
                   onPressed: () {
                     debugPrint('Sign in button pressed');
+                    debugPrint('is teacher: $_isTeacher');
                     context.read<AuthBloc>().add(
                       RequestLogin(
                         email: emailController.text,
                         password: passwordController.text,
+                        isTeacher: _isTeacher
                       ),
                     );
                     // Navigator.pushReplacement(

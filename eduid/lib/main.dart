@@ -1,3 +1,4 @@
+import 'package:eduid/features/auth/presentation/bloc/logout/logout_bloc.dart';
 import 'package:eduid/features/splash/presentation/bloc/authorization_bloc.dart';
 import 'package:eduid/features/auth/presentation/bloc/login/auth_bloc.dart';
 import 'package:eduid/features/splash/presentation/splash_screen.dart';
@@ -12,6 +13,7 @@ void main() {
         BlocProvider(
           create: (context) => AuthorizationBloc()..add(RequestAuthorization()),
         ),
+        BlocProvider(create: (context) => LogoutBloc(),)
       ],
       child: const MyApp(),
     ),
