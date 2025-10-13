@@ -1,18 +1,30 @@
 import 'package:eduid/core/storage/flutter_secure_storage.dart';
 import 'package:eduid/features/auth/presentation/bloc/logout/logout_bloc.dart';
 import 'package:eduid/features/auth/presentation/screens/login/login_screen.dart';
+import 'package:eduid/features/home/presentation/provider/navigationProvider.dart';
 import 'package:eduid/features/student_dashaboard/presentation/student_dashboard_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+  static const List<Widget> homePageList = [
+    StudentDashboardScreen(),
+    Home2(),
+    Home3(),
+    Home4(),
+    Home5(),
+  ];
 
   get storage => SecureStorage.instance.storage;
 
   @override
   Widget build(BuildContext context) {
+    final navigationProvider = Provider.of<NavigationProvider>(context);
+    int currentIndex = 0;
+
     return BlocListener<LogoutBloc, LogoutState>(
       listener: (context, state) {
         if (state is LogoutSuccess) {
@@ -28,10 +40,10 @@ class HomeScreen extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.blue[800],
+          backgroundColor: Theme.of(context).colorScheme.primary,
           elevation: 4,
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
           ),
           leading: Builder(
             builder: (context) => IconButton(
@@ -70,8 +82,12 @@ class HomeScreen extends StatelessWidget {
                   // Go to profile page
                   showDialog(
                     context: context,
-                    builder: (context) =>
-                        CupertinoAlertDialog(title: Text('Hello'), content: Text('lorem asdasd asd asd ad ad asd ada a a da dad a dasdasdasdas da'),),
+                    builder: (context) => CupertinoAlertDialog(
+                      title: Text('Hello'),
+                      content: Text(
+                        'lorem asdasd asd asd ad ad asd ada a a da dad a dasdasdasdas da',
+                      ),
+                    ),
                   );
                 },
                 child: CircleAvatar(
@@ -109,35 +125,93 @@ class HomeScreen extends StatelessWidget {
                   Navigator.pop(context);
                 },
               ),
+              SizedBox(height: double.infinity,),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Logout'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
             ],
           ),
         ),
-        body: Center(
-          child: StudentDashboardScreen(),
-        ),
+        body: Center(child: homePageList[navigationProvider.currentIndex]),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Container(
-            decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6.0)),
+            padding: EdgeInsets.symmetric(vertical: 12.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Icon(Icons.home_outlined),
-                Icon(Icons.groups),
-                Icon(Icons.),
-                Icon(Icons.home_outlined),
-                Icon(Icons.home_outlined),
+                GestureDetector(
+                  onTap: () {
+                    navigationProvider.navigate(index: 0);
+                  },
+                  child: Image.asset(
+                    'assets/icons/home.png',
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    navigationProvider.navigate(index: 1);
+                  },
+                  child: Image.asset(
+                    'assets/icons/classroom.png',
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    navigationProvider.navigate(index: 2);
+                  },
+                  child: Image.asset(
+                    'assets/icons/graduation.png',
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    navigationProvider.navigate(index: 3);
+                  },
+                  child: Image.asset(
+                    'assets/icons/notification.png',
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    navigationProvider.navigate(index: 4);
+                  },
+                  child: Image.asset(
+                    'assets/icons/posts.png',
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        // bottomNavigationBar: BottomNavigationBar(items: [
-        //   BottomNavigationBarItem(label: '', icon: Icon( Icons.home_outlined)),
-        //   BottomNavigationBarItem(label: '',icon: Icon( Icons.home_outlined)),
-        //   BottomNavigationBarItem(label: '',icon: Icon( Icons.home_outlined)),
-        // ]),
       ),
     );
   }
+
+  void _displayHome(int i) {}
 
   void _showAlert(
     BuildContext context,
@@ -178,5 +252,41 @@ class HomeScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class Home2 extends StatelessWidget {
+  const Home2({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page 2'));
+  }
+}
+
+class Home3 extends StatelessWidget {
+  const Home3({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page 3'));
+  }
+}
+
+class Home4 extends StatelessWidget {
+  const Home4({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page 4'));
+  }
+}
+
+class Home5 extends StatelessWidget {
+  const Home5({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page 5'));
   }
 }

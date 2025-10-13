@@ -6,7 +6,7 @@ const { generateAccessToken, generateRefreshToken } = require("../infrastructure
 router.post("/refresh_token", (req, res) => {
     const { accessToken, refreshToken } = req.body;
 
-    if (!accessToken || !refreshToken) {
+    if (!accessToken && !refreshToken) {
         return res.status(400).json({ message: "Access token and refresh token are required", state: "missing_tokens" });
     }
 
@@ -23,7 +23,6 @@ router.post("/refresh_token", (req, res) => {
 
             console.log('Access token error: ' + err);
             
-
             if (err.name !== "TokenExpiredError") {
                 return res.status(403).json({ message: "Invalid access token", state: "invalid_access_token" });
             }

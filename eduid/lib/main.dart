@@ -1,10 +1,12 @@
 import 'package:eduid/core/theme/theme.dart';
 import 'package:eduid/features/auth/presentation/bloc/logout/logout_bloc.dart';
+import 'package:eduid/features/home/presentation/provider/navigationProvider.dart';
 import 'package:eduid/features/splash/presentation/bloc/authorization_bloc.dart';
 import 'package:eduid/features/auth/presentation/bloc/login/auth_bloc.dart';
 import 'package:eduid/features/splash/presentation/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(
@@ -16,7 +18,12 @@ void main() {
         ),
         BlocProvider(create: (context) => LogoutBloc()),
       ],
-      child: const MyApp(),
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => NavigationProvider()),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
   // runApp(const MyApp());
@@ -28,11 +35,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightMode,
-        darkTheme: AppTheme.darkMode,
-        themeMode: ThemeMode.system,
-        home: SplashScreen()
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightMode,
+      darkTheme: AppTheme.darkMode,
+      themeMode: ThemeMode.system,
+      home: SplashScreen(),
     );
   }
 }
