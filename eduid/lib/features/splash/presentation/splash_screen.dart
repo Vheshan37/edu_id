@@ -1,3 +1,4 @@
+import 'package:eduid/core/navigation/navigator.dart';
 import 'package:eduid/features/splash/presentation/bloc/authorization_bloc.dart';
 import 'package:eduid/features/auth/presentation/screens/login/login_screen.dart';
 import 'package:eduid/features/home/presentation/home_screen.dart';
@@ -22,14 +23,15 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateTo(Widget screen) {
     if (!_hasNavigate && mounted) {
       _hasNavigate = true;
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => screen));
+      AppNavigator.pushAndReplace(context, screen);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocConsumer<AuthorizationBloc, AuthorizationState>(
       listener: (context, state) {
         if (_hasNavigate) return;
@@ -50,18 +52,65 @@ class _SplashScreenState extends State<SplashScreen> {
       },
       builder: (context, state) {
         return Scaffold(
+          backgroundColor: colorScheme.background,
           extendBodyBehindAppBar: true,
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/logo.png'),
-                Text('Edu ID'),
-                Text('Your Education, Your Future.'),
-                Text('Every Step Counts'),
-              ],
-            ),
+          body: Stack(
+            children: [
+              if (Theme.of(context).brightness == Brightness.light)
+                Image.asset(
+                  'assets/images/background_2.png',
+                  fit: BoxFit.cover,
+                  height: double.infinity,
+                ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                      color: colorScheme.onPrimary,
+                    ),
+                    Text(
+                      'Edu ID',
+                      style: theme.textTheme.headlineLarge?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Your Education, Your Future.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSecondary,
+                      ),
+                    ),
+                    Text(
+                      'Every Step Counts',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: Text(
+                      '© 2025 Edu ID. Sri Lankan Learning Platform.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

@@ -1,3 +1,4 @@
+import 'package:eduid/core/theme/theme.dart';
 import 'package:eduid/features/auth/presentation/bloc/logout/logout_bloc.dart';
 import 'package:eduid/features/splash/presentation/bloc/authorization_bloc.dart';
 import 'package:eduid/features/auth/presentation/bloc/login/auth_bloc.dart';
@@ -13,7 +14,7 @@ void main() {
         BlocProvider(
           create: (context) => AuthorizationBloc()..add(RequestAuthorization()),
         ),
-        BlocProvider(create: (context) => LogoutBloc(),)
+        BlocProvider(create: (context) => LogoutBloc()),
       ],
       child: const MyApp(),
     ),
@@ -26,6 +27,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: SplashScreen());
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightMode,
+        darkTheme: AppTheme.darkMode,
+        themeMode: ThemeMode.system,
+        home: SplashScreen()
+    );
   }
 }

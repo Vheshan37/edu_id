@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:eduid/app/flutter_secure_storage.dart';
 import 'package:eduid/core/exception/login_exception.dart';
+import 'package:eduid/core/storage/flutter_secure_storage.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http show Client;
 
@@ -38,46 +39,85 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> requestLogin() async {
-    final response = await client.post(
-      Uri.parse('${baseUrl}auth_user/login'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'isTeacher': isTeacher,
-      }),
-    );
+    try {
+      if (email == null ||
+          email!.isEmpty ||
+          password == null ||
+          password!.isEmpty) {
+        throw LoginException(
+          title: 'Invalid Input',
+          message: 'Email and password are required.',
+        );
+      }
 
-    debugPrint('Response: $response');
-    debugPrint('Response (Status): ${response.statusCode}');
-    final json = await jsonDecode(response.body);
+      final response = await client.post(
+        Uri.parse('${baseUrl}auth_user/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'isTeacher': isTeacher,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      // request success
-      debugPrint('Response JSON: $json');
-      return json;
-    } else if (response.statusCode == 401 &&
-        json['message'] == "Authentication failed") {
-      throw LoginException(
-        title: 'Authentication Failed',
-        message:
-            'The email or password you entered is incorrect. Please try again.',
-      );
-    } else if (response.statusCode == 500) {
-      throw LoginException(
-        title: 'Server Error',
-        message:
-            'We are currently experiencing issues. Please try again later.',
-      );
-    } else {
-      throw LoginException(
-        title: 'Login Failed',
-        message:
-            'An unexpected error occurred. Please check your connection and try again.',
-      );
+      debugPrint('Response: $response');
+      debugPrint('Response (Status): ${response.statusCode}');
+      final json = await jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // request success
+        debugPrint('Response JSON: $json');
+        return json;
+      } else if (response.statusCode == 401 &&
+          json['message'] == "Authentication failed") {
+        throw LoginException(
+          title: 'Authentication Failed',
+          message:
+              'The email or password you entered is incorrect. Please try again.',
+        );
+      } else if (response.statusCode == 500) {
+        throw LoginException(
+          title: 'Server Error',
+          message:
+              'We are currently experiencing issues. Please try again later.',
+        );
+      } else {
+        throw LoginException(
+          title: 'Login Failed',
+          message:
+              'An unexpected error occurred. Please check your connection and try again.',
+        );
+      }
+    } catch (e) {
+      if (e is LoginException) {
+        rethrow;
+      } else if (e is SocketException) {
+        throw LoginException(
+          title: 'Network Error',
+          message:
+              'Could not connect to the server. Please check your internet connection or try again later — the server may be temporarily unavailable.',
+        );
+      } else if (e is FormatException) {
+        throw LoginException(
+          title: 'Invalid Response',
+          message:
+              'The server returned data in an unexpected format. Please try again later.',
+        );
+      } else if (e is TimeoutException) {
+        throw LoginException(
+          title: 'Request Timeout',
+          message:
+              'The server is taking too long to respond. Please try again later.',
+        );
+      } else {
+        throw LoginException(
+          title: 'Unexpected Error',
+          message: 'Something went wrong: $e',
+        );
+      }
     }
   }
 

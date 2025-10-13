@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:eduid/app/flutter_secure_storage.dart';
+import 'package:eduid/core/storage/flutter_secure_storage.dart';
 import 'package:meta/meta.dart';
 
 part 'logout_event.dart';
